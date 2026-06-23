@@ -26,9 +26,10 @@ jobs:
           VISION_BASE_URL: ${{ secrets.VISION_BASE_URL }}
           VISION_MODEL: ${{ secrets.VISION_MODEL }}
 
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: 98418c9d7c90c4f154ac693a809bb816
-          command: pages deploy out/ --project-name=slide-studio --branch=main
+        run: wrangler pages deploy out/ --project-name=slide-studio --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
