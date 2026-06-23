@@ -1,0 +1,36 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Create env file
+        run: |
+          echo "LLM_API_KEY=${{ secrets.LLM_API_KEY }}" >> .env.local
+          echo "LLM_BASE_URL=${{ secrets.LLM_BASE_URL }}" >> .env.local
+          echo "LLM_MODEL=${{ secrets.LLM_MODEL }}" >> .env.local
+          echo "VISION_API_KEY=${{ secrets.VISION_API_KEY }}" >> .env.local
+          echo "VISION_BASE_URL=${{ secrets.VISION_BASE_URL }}" >> .env.local
+          echo "VISION_MODEL=${{ secrets.VISION_MODEL }}" >> .env.local
+
+      - run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: 98418c9d7c90c4f154ac693a809bb816
+          command: pages deploy out/ --project-name=slide-studio --branch=main
